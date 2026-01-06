@@ -11,45 +11,48 @@ from pathlib import Path
 import logging
 from datetime import datetime
 import uvicorn
-from prometheus_client import Counter, Gauge, generate_latest, CONTENT_TYPE_LATEST, Histogram
+from prometheus_client import (
+    Counter,
+    Gauge,
+    generate_latest,
+    CONTENT_TYPE_LATEST,
+    Histogram,
+)
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('logs/api.log'),
-        logging.StreamHandler()
-    ]
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.FileHandler("logs/api.log"), logging.StreamHandler()],
 )
 logger = logging.getLogger(__name__)
 
 # Prometheus Metrics
 PREDICTION_COUNT = Counter(
-    'prediction_count_total', 
-    'Total number of heart disease predictions'
+    "prediction_count_total", "Total number of heart disease predictions"
 )
 PREDICTION_LATENCY = Histogram(
-    'prediction_latency_seconds', 
-    'Time spent processing prediction'
+    "prediction_latency_seconds", "Time spent processing prediction"
 )
 
 # metrics for Model Outputs
 PREDICTION_RESULTS = Counter(
-    'model_prediction_results_total',
-    'Count of predictions by risk level',
-    ['risk_level', 'prediction_class']
+    "model_prediction_results_total",
+    "Count of predictions by risk level",
+    ["risk_level", "prediction_class"],
 )
 
 # metrics for Feature Distributions (Gauges are best for current values)
-FEATURE_AGE = Gauge('feature_age_years', 'Age of the latest applicant')
-FEATURE_CHOL = Gauge('feature_cholesterol_mgdl', 'Cholesterol level of the latest applicant')
+FEATURE_AGE = Gauge("feature_age_years", "Age of the latest applicant")
+FEATURE_CHOL = Gauge(
+    "feature_cholesterol_mgdl", "Cholesterol level of the latest applicant"
+)
 
 # Create FastAPI app
 app = FastAPI(
     title="Heart Disease Prediction API",
     description="API for predicting heart disease risk",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 # Load model and preprocessor at startup
@@ -64,6 +67,7 @@ except Exception as e:
     logger.error(f"✗ Error loading model: {e}")
     model = None
     preprocessor = None
+
 
 # Request schema
 class HeartDiseaseInput(BaseModel):
@@ -80,7 +84,7 @@ class HeartDiseaseInput(BaseModel):
     slope: int = Field(..., ge=0, le=2, description="Slope of peak exercise ST")
     ca: int = Field(..., ge=0, le=4, description="Number of major vessels")
     thal: int = Field(..., ge=0, le=3, description="Thalassemia")
-    
+
     model_config = {
         "json_schema_extra": {
             "example": {
@@ -96,10 +100,11 @@ class HeartDiseaseInput(BaseModel):
                 "oldpeak": 2.3,
                 "slope": 0,
                 "ca": 0,
-                "thal": 1
+                "thal": 1,
             }
         }
     }
+
 
 # Response schema
 class PredictionResponse(BaseModel):
@@ -109,6 +114,7 @@ class PredictionResponse(BaseModel):
     message: str
     timestamp: str
 
+
 @app.get("/")
 async def root():
     """Root endpoint"""
@@ -116,25 +122,23 @@ async def root():
         "message": "Heart Disease Prediction API",
         "version": "1.0.0",
         "status": "active",
-        "endpoints": {
-            "health": "/health",
-            "predict": "/predict",
-            "docs": "/docs"
-        }
+        "endpoints": {"health": "/health", "predict": "/predict", "docs": "/docs"},
     }
+
 
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
     model_status = "loaded" if model is not None else "not loaded"
     preprocessor_status = "loaded" if preprocessor is not None else "not loaded"
-    
+
     return {
         "status": "healthy" if (model and preprocessor) else "unhealthy",
         "model_status": model_status,
         "preprocessor_status": preprocessor_status,
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
+
 
 @app.post("/predict", response_model=PredictionResponse)
 async def predict(input_data: HeartDiseaseInput):
@@ -147,27 +151,24 @@ async def predict(input_data: HeartDiseaseInput):
             # Check if model is loaded
             if model is None or preprocessor is None:
                 logger.error("Model or preprocessor not loaded")
-                raise HTTPException(
-                    status_code=503,
-                    detail="Model not available"
-                )
-            
+                raise HTTPException(status_code=503, detail="Model not available")
+
             # Log request
             logger.info(f"Prediction request received: {input_data.model_dump()}")
-            
+
             # Convert input to DataFrame
             input_df = pd.DataFrame([input_data.model_dump()])
-            
+
             # Preprocess
             input_processed = preprocessor.transform(input_df)
 
             # Increment the counter
             PREDICTION_COUNT.inc()
-            
+
             # Make prediction
             prediction = model.predict(input_processed)[0]
             probability = model.predict_proba(input_processed)[0][1]
-            
+
             # Determine risk level
             if probability < 0.3:
                 risk_level = "Low"
@@ -175,31 +176,28 @@ async def predict(input_data: HeartDiseaseInput):
                 risk_level = "Medium"
             else:
                 risk_level = "High"
-            
+
             # Create response
             response = PredictionResponse(
                 prediction=int(prediction),
                 probability=float(probability),
                 risk_level=risk_level,
                 message=f"Heart disease {'detected' if prediction == 1 else 'not detected'}",
-                timestamp=datetime.now().isoformat()
+                timestamp=datetime.now().isoformat(),
             )
-            
+
             # Log response
             logger.info(f"Prediction: {prediction}, Probability: {probability:.4f}")
             PREDICTION_RESULTS.labels(
-                risk_level=risk_level, 
-                prediction_class=str(prediction)
+                risk_level=risk_level, prediction_class=str(prediction)
             ).inc()
-            
+
             return response
-            
+
         except Exception as e:
             logger.error(f"Prediction error: {str(e)}")
-            raise HTTPException(
-                status_code=500,
-                detail=f"Prediction failed: {str(e)}"
-            )
+            raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
+
 
 # @app.get("/metrics")
 # async def get_metrics():
@@ -213,17 +211,8 @@ async def predict(input_data: HeartDiseaseInput):
 @app.get("/metrics")
 async def get_metrics():
     """Exposes Prometheus metrics in the correct text format"""
-    return Response(
-        content=generate_latest(), 
-        media_type=CONTENT_TYPE_LATEST
-    )
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 if __name__ == "__main__":
-    uvicorn.run(
-        "app:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,
-        log_level="info"
-    )
+    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True, log_level="info")
