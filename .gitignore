@@ -52,8 +52,8 @@ mlruns/
 !models/.gitkeep
 
 # Logs
-logs/
-*.log
+# logs/
+# *.log
 
 # Testing
 .pytest_cache/
