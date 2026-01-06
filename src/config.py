@@ -3,8 +3,8 @@ Configuration Management for MLOps Project
 """
 
 import os
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
 
 # Base paths
 BASE_DIR = Path(__file__).resolve().parent.parent

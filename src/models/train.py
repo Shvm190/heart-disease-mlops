@@ -2,25 +2,20 @@
 Model Training with MLflow Tracking
 """
 
+from pathlib import Path
+
+import joblib
+import matplotlib.pyplot as plt
 import mlflow
 import mlflow.sklearn
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.metrics import (
-    accuracy_score,
-    precision_score,
-    recall_score,
-    f1_score,
-    roc_auc_score,
-    classification_report,
-    confusion_matrix,
-)
-import joblib
 import numpy as np
-from pathlib import Path
-import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (accuracy_score, classification_report,
+                             confusion_matrix, f1_score, precision_score,
+                             recall_score, roc_auc_score)
+from sklearn.model_selection import cross_val_score, train_test_split
 
 
 class ModelTrainer:
@@ -194,12 +189,8 @@ import pandas as pd
 
 if __name__ == "__main__":
     from src.config import config
-    from src.data.preprocessing import (
-        load_data,
-        clean_data,
-        split_features_target,
-        HeartDiseasePreprocessor,
-    )
+    from src.data.preprocessing import (HeartDiseasePreprocessor, clean_data,
+                                        load_data, split_features_target)
 
     # Load and preprocess data
     df = load_data(config.data.raw_data_path)

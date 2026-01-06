@@ -2,22 +2,18 @@
 FastAPI Application for Heart Disease Prediction
 """
 
-from fastapi import FastAPI, HTTPException, Response
-from pydantic import BaseModel, Field
-import joblib
-import pandas as pd
-import numpy as np
-from pathlib import Path
 import logging
 from datetime import datetime
+from pathlib import Path
+
+import joblib
+import numpy as np
+import pandas as pd
 import uvicorn
-from prometheus_client import (
-    Counter,
-    Gauge,
-    generate_latest,
-    CONTENT_TYPE_LATEST,
-    Histogram,
-)
+from fastapi import FastAPI, HTTPException, Response
+from prometheus_client import (CONTENT_TYPE_LATEST, Counter, Gauge, Histogram,
+                               generate_latest)
+from pydantic import BaseModel, Field
 
 # Configure logging
 logging.basicConfig(

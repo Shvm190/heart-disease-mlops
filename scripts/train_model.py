@@ -9,16 +9,14 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.config import config
-from src.data.preprocessing import (
-    load_data,
-    clean_data,
-    split_features_target,
-    HeartDiseasePreprocessor,
-)
-from src.models.train import ModelTrainer
-from sklearn.model_selection import train_test_split
 import logging
+
+from sklearn.model_selection import train_test_split
+
+from src.config import config
+from src.data.preprocessing import (HeartDiseasePreprocessor, clean_data,
+                                    load_data, split_features_target)
+from src.models.train import ModelTrainer
 
 # Configure logging
 logging.basicConfig(
