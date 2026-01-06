@@ -13,7 +13,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.data.preprocessing import (HeartDiseasePreprocessor, clean_data,
-                                    load_data, split_features_target)
+                                    split_features_target)
 
 
 @pytest.fixture

@@ -8,14 +8,17 @@ import joblib
 import matplotlib.pyplot as plt
 import mlflow
 import mlflow.sklearn
-import numpy as np
+import pandas as pd
 import seaborn as sns
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import (accuracy_score, classification_report,
-                             confusion_matrix, f1_score, precision_score,
-                             recall_score, roc_auc_score)
+from sklearn.metrics import (accuracy_score, confusion_matrix, f1_score,
+                             precision_score, recall_score, roc_auc_score)
 from sklearn.model_selection import cross_val_score, train_test_split
+
+from src.config import config
+from src.data.preprocessing import (HeartDiseasePreprocessor, clean_data,
+                                    load_data, split_features_target)
 
 
 class ModelTrainer:
@@ -74,7 +77,7 @@ class ModelTrainer:
             self.models["logistic_regression"] = model
             self.results["logistic_regression"] = metrics
 
-            print(f"✓ Logistic Regression trained")
+            print("✓ Logistic Regression trained")
             self._print_metrics(metrics)
 
             return model, metrics
@@ -135,7 +138,7 @@ class ModelTrainer:
             self.models["random_forest"] = model
             self.results["random_forest"] = metrics
 
-            print(f"✓ Random Forest trained")
+            print("✓ Random Forest trained")
             self._print_metrics(metrics)
 
             return model, metrics
@@ -185,13 +188,7 @@ class ModelTrainer:
         print(f"✓ Model saved to {model_path}")
 
 
-import pandas as pd
-
 if __name__ == "__main__":
-    from src.config import config
-    from src.data.preprocessing import (HeartDiseasePreprocessor, clean_data,
-                                        load_data, split_features_target)
-
     # Load and preprocess data
     df = load_data(config.data.raw_data_path)
     df_clean = clean_data(df)

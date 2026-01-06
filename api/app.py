@@ -7,7 +7,6 @@ from datetime import datetime
 from pathlib import Path
 
 import joblib
-import numpy as np
 import pandas as pd
 import uvicorn
 from fastapi import FastAPI, HTTPException, Response
