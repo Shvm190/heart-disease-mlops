@@ -101,13 +101,27 @@ class TestAPIEndpoints:
         response = client.post("/predict", json=payload)
         assert response.status_code == 422
 
+    # def test_metrics_endpoint(self):
+    #     """Test metrics endpoint"""
+    #     response = client.get("/metrics")
+    #     assert response.status_code == 200
+    #     data = response.json()
+    #     assert "total_predictions" in data
     def test_metrics_endpoint(self):
         """Test metrics endpoint"""
         response = client.get("/metrics")
         assert response.status_code == 200
-        data = response.json()
-        assert "total_predictions" in data
-
+        
+        # Change this: instead of response.json(), use response.text
+        content = response.text
+        
+        # Verify specific Prometheus metrics are present
+        # Based on your logs, these are the expected keys:
+        assert "python_gc_objects_collected_total" in content
+        assert "feature_cholesterol_mgdl" in content
+        
+        # Optional: Verify the Content-Type header is correct for Prometheus
+        assert "text/plain" in response.headers["Content-Type"]
 
 class TestAPIValidation:
     """Test input validation"""

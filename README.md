@@ -2,6 +2,25 @@
 
 This project implements a production-ready MLOps pipeline for heart disease risk classification, featuring experiment tracking, containerization, and Kubernetes orchestration.
 
+# Architechture Diagram
+
+```mermaid
+graph TB
+    A[Data Source] -->|Download| B[Data Processing]
+    B -->|Clean & Transform| C[Feature Engineering]
+    C -->|Train| D[Model Training]
+    D -->|Log| E[MLflow Tracking]
+    D -->|Save| F[Model Registry]
+    F -->|Package| G[Docker Container]
+    G -->|Deploy| H[Kubernetes]
+    H -->|Expose| I[Load Balancer]
+    I -->|Serve| J[API Endpoint]
+    J -->|Monitor| K[Prometheus]
+    K -->|Visualize| L[Grafana]
+    M[GitHub] -->|Trigger| N[CI/CD Pipeline]
+    N -->|Build & Test| G
+```
+
 
 # Project Structure
 ```
