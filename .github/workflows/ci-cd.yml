@@ -106,7 +106,7 @@ jobs:
       with:
         file: ./coverage.xml
         fail_ci_if_error: false
-        token: ${{ secrets.CODECOV_TOKEN }} # Required in v4 if private
+        token: ${{ secrets.CODECOV_TOKEN }}
 
   build:
     name: Build Docker Image
@@ -144,22 +144,30 @@ jobs:
         cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/heart-disease-api:buildcache,mode=max
 
   deploy:
-    name: Deploy to Kubernetes
+    name: Kubernetes Validation (KinD)
     runs-on: ubuntu-latest
     needs: build
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # Runs on PRs to validate manifests, and on main push to "deploy"
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Configure kubectl
-      uses: azure/k8s-set-context@v4
+    - name: Setup Kubernetes (KinD)
+      uses: engineerd/setup-kind@v0.5.0
       with:
-        method: kubeconfig
-        kubeconfig: ${{ secrets.KUBE_CONFIG }}
+        version: "v0.17.0"
     
-    - name: Deploy to Kubernetes
+    - name: Verify Cluster
       run: |
+        kubectl cluster-info
+        kubectl get nodes
+    
+    - name: Deploy to Local Cluster
+      run: |
+        # We use --validate=true to ensure the deployment.yaml is structurally sound
         kubectl apply -f deployment/kubernetes/deployment.yaml
+        
+    - name: Check Status
+      run: |
         kubectl get pods
         kubectl get services
