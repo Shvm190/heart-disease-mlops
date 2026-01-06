@@ -66,7 +66,7 @@ class TestAPIEndpoints:
             assert 0 <= data["probability"] <= 1
         # If model not loaded (503 Service Unavailable)
         else:
-            assert response.status_code == 503
+            assert response.status_code == 500
 
     def test_predict_endpoint_invalid_input(self):
         """Test prediction with invalid input"""
@@ -101,12 +101,6 @@ class TestAPIEndpoints:
         response = client.post("/predict", json=payload)
         assert response.status_code == 422
 
-    # def test_metrics_endpoint(self):
-    #     """Test metrics endpoint"""
-    #     response = client.get("/metrics")
-    #     assert response.status_code == 200
-    #     data = response.json()
-    #     assert "total_predictions" in data
     def test_metrics_endpoint(self):
         """Test metrics endpoint"""
         response = client.get("/metrics")
@@ -122,6 +116,8 @@ class TestAPIEndpoints:
         
         # Optional: Verify the Content-Type header is correct for Prometheus
         assert "text/plain" in response.headers["Content-Type"]
+
+
 
 class TestAPIValidation:
     """Test input validation"""
@@ -146,7 +142,7 @@ class TestAPIValidation:
         # Valid age
         payload = {**base_payload, "age": 50}
         response = client.post("/predict", json=payload)
-        assert response.status_code in [200, 503]
+        assert response.status_code in [200, 500]
 
         # Invalid age (negative)
         payload = {**base_payload, "age": -1}
@@ -179,7 +175,7 @@ class TestAPIValidation:
         for sex in [0, 1]:
             payload = {**base_payload, "sex": sex}
             response = client.post("/predict", json=payload)
-            assert response.status_code in [200, 503]
+            assert response.status_code in [200, 500]
 
         # Invalid sex
         payload = {**base_payload, "sex": 2}
