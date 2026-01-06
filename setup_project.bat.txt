@@ -1,0 +1,406 @@
+@echo off
+REM Heart Disease MLOps - Project Setup Script (Windows)
+REM This script creates the complete folder structure for the MLOps project
+
+setlocal enabledelayedexpansion
+
+echo ==========================================
+echo Heart Disease MLOps - Project Setup
+echo ==========================================
+echo.
+
+REM Project name
+set PROJECT_NAME=heart-disease-mlops
+
+REM Check if directory already exists
+if exist "%PROJECT_NAME%" (
+    echo WARNING: Directory '%PROJECT_NAME%' already exists!
+    set /p "choice=Do you want to remove it and create a fresh setup? (y/n): "
+    if /i "!choice!"=="y" (
+        echo Removing existing directory...
+        rmdir /s /q "%PROJECT_NAME%"
+    ) else (
+        echo Setup cancelled.
+        exit /b 1
+    )
+)
+
+REM Create project root
+echo Creating project directory: %PROJECT_NAME%
+mkdir "%PROJECT_NAME%"
+cd "%PROJECT_NAME%"
+
+echo Creating folder structure...
+
+REM Create main directories
+mkdir data\raw
+mkdir data\processed
+mkdir notebooks
+mkdir src\data
+mkdir src\models
+mkdir src\features
+mkdir src\utils
+mkdir api
+mkdir tests
+mkdir models
+mkdir logs
+mkdir mlruns
+mkdir deployment\kubernetes
+mkdir deployment\helm\heart-disease-chart
+mkdir monitoring
+mkdir scripts
+mkdir screenshots
+mkdir .github\workflows
+
+echo [OK] Main directories created
+
+REM Create __init__.py files for Python packages
+echo Creating Python package files...
+type nul > src\__init__.py
+type nul > src\data\__init__.py
+type nul > src\models\__init__.py
+type nul > src\features\__init__.py
+type nul > src\utils\__init__.py
+type nul > api\__init__.py
+type nul > tests\__init__.py
+
+echo [OK] Python package files created
+
+REM Create .gitkeep files for empty directories
+echo Creating .gitkeep files...
+type nul > data\raw\.gitkeep
+type nul > data\processed\.gitkeep
+type nul > models\.gitkeep
+type nul > logs\.gitkeep
+type nul > screenshots\.gitkeep
+type nul > mlruns\.gitkeep
+
+echo [OK] .gitkeep files created
+
+REM Create README.md
+echo Creating placeholder files...
+(
+echo # Heart Disease Prediction - MLOps Project
+echo.
+echo ## Setup Instructions
+echo.
+echo 1. Install dependencies:
+echo ```bash
+echo pip install -r requirements.txt
+echo ```
+echo.
+echo 2. Download data:
+echo ```bash
+echo python data/download_data.py
+echo ```
+echo.
+echo 3. Train model:
+echo ```bash
+echo python scripts/train_model.py
+echo ```
+echo.
+echo 4. Run API:
+echo ```bash
+echo uvicorn api.app:app --reload
+echo ```
+echo.
+echo More documentation coming soon...
+) > README.md
+
+REM Create .env.example
+(
+echo # Environment Variables Template
+echo # Copy this file to .env and fill in your values
+echo.
+echo # MLflow
+echo MLFLOW_TRACKING_URI=file:./mlruns
+echo.
+echo # API
+echo API_HOST=0.0.0.0
+echo API_PORT=8000
+echo.
+echo # Docker Hub ^(for CI/CD^)
+echo DOCKER_USERNAME=your_username
+echo DOCKER_PASSWORD=your_password
+echo.
+echo # Kubernetes ^(optional^)
+echo KUBE_CONFIG=your_kube_config
+) > .env.example
+
+REM Create pytest.ini
+(
+echo [pytest]
+echo testpaths = tests
+echo python_files = test_*.py
+echo python_classes = Test*
+echo python_functions = test_*
+echo addopts = 
+echo     -v
+echo     --strict-markers
+echo     --cov=src
+echo     --cov=api
+echo     --cov-report=term-missing
+echo     --cov-report=html
+echo markers =
+echo     slow: marks tests as slow ^(deselect with '-m "not slow"'^)
+echo     integration: marks tests as integration tests
+) > pytest.ini
+
+REM Create .dockerignore
+(
+echo # Git
+echo .git
+echo .gitignore
+echo.
+echo # Python
+echo __pycache__
+echo *.pyc
+echo *.pyo
+echo *.pyd
+echo .Python
+echo *.so
+echo *.egg
+echo *.egg-info
+echo dist
+echo build
+echo.
+echo # Virtual Environment
+echo venv/
+echo env/
+echo ENV/
+echo.
+echo # IDEs
+echo .vscode
+echo .idea
+echo *.swp
+echo *.swo
+echo.
+echo # Testing
+echo .pytest_cache
+echo .coverage
+echo htmlcov/
+echo *.cover
+echo.
+echo # Data
+echo data/raw/*.csv
+echo mlruns/
+echo.
+echo # Docs
+echo *.md
+echo docs/
+echo.
+echo # Logs
+echo logs/
+echo *.log
+echo.
+echo # OS
+echo .DS_Store
+echo Thumbs.db
+) > .dockerignore
+
+REM Create .gitignore
+(
+echo # Python
+echo __pycache__/
+echo *.py[cod]
+echo *$py.class
+echo *.so
+echo .Python
+echo build/
+echo dist/
+echo *.egg-info/
+echo.
+echo # Virtual Environment
+echo venv/
+echo env/
+echo ENV/
+echo .venv
+echo.
+echo # IDEs
+echo .vscode/
+echo .idea/
+echo *.swp
+echo .DS_Store
+echo.
+echo # Jupyter Notebook
+echo .ipynb_checkpoints
+echo.
+echo # Data
+echo data/raw/*.csv
+echo data/processed/*.csv
+echo !data/raw/.gitkeep
+echo !data/processed/.gitkeep
+echo.
+echo # Models
+echo models/*.pkl
+echo models/*.h5
+echo !models/.gitkeep
+echo.
+echo # Logs
+echo logs/
+echo *.log
+echo.
+echo # Testing
+echo .pytest_cache/
+echo .coverage
+echo htmlcov/
+echo.
+echo # Environment variables
+echo .env
+echo .env.local
+echo.
+echo # MLflow
+echo mlruns/
+echo mlartifacts/
+echo.
+echo # Screenshots
+echo screenshots/*.png
+echo !screenshots/.gitkeep
+) > .gitignore
+
+REM Create PROJECT_STRUCTURE.md
+(
+echo # Project Structure
+echo.
+echo ```
+echo heart-disease-mlops/
+echo ├── data/
+echo │   ├── raw/                          # Raw dataset files
+echo │   └── processed/                    # Processed data
+echo ├── notebooks/
+echo │   ├── 01_eda.ipynb
+echo │   ├── 02_feature_engineering.ipynb
+echo │   └── 03_model_training.ipynb
+echo ├── src/
+echo │   ├── config.py
+echo │   ├── data/
+echo │   ├── models/
+echo │   ├── features/
+echo │   └── utils/
+echo ├── api/
+echo │   ├── app.py
+echo │   └── schemas.py
+echo ├── tests/
+echo ├── models/
+echo ├── deployment/
+echo │   ├── kubernetes/
+echo │   └── helm/
+echo ├── monitoring/
+echo ├── scripts/
+echo └── screenshots/
+echo ```
+) > PROJECT_STRUCTURE.md
+
+REM Create SETUP_CHECKLIST.md
+(
+echo # Setup Checklist
+echo.
+echo ## Initial Setup
+echo - [ ] Run setup_project.bat
+echo - [ ] Create virtual environment: `python -m venv venv`
+echo - [ ] Activate virtual environment: `venv\Scripts\activate`
+echo - [ ] Install dependencies: `pip install -r requirements.txt`
+echo.
+echo ## Development
+echo - [ ] Download data: `python data/download_data.py`
+echo - [ ] Train model: `python scripts/train_model.py`
+echo - [ ] Run tests: `pytest tests/ -v`
+echo - [ ] Start API: `uvicorn api.app:app --reload`
+echo.
+echo ## Docker
+echo - [ ] Build image: `docker build -t heart-disease-api:latest .`
+echo - [ ] Run container: `docker run -p 8000:8000 heart-disease-api:latest`
+echo.
+echo ## Documentation
+echo - [ ] Take screenshots
+echo - [ ] Update README.md
+echo - [ ] Write final report
+) > SETUP_CHECKLIST.md
+
+REM Create QUICK_REFERENCE.md
+(
+echo # Quick Reference Guide
+echo.
+echo ## Common Commands
+echo.
+echo ### Environment Setup
+echo ```bash
+echo # Create virtual environment
+echo python -m venv venv
+echo.
+echo # Activate ^(Windows^)
+echo venv\Scripts\activate
+echo.
+echo # Install dependencies
+echo pip install -r requirements.txt
+echo ```
+echo.
+echo ### Training
+echo ```bash
+echo python scripts/train_model.py
+echo mlflow ui
+echo ```
+echo.
+echo ### Testing
+echo ```bash
+echo pytest tests/ -v
+echo ```
+echo.
+echo ### API
+echo ```bash
+echo uvicorn api.app:app --reload
+echo ```
+) > QUICK_REFERENCE.md
+
+echo [OK] Placeholder files created
+
+REM Initialize git repository
+echo Initializing git repository...
+git init >nul 2>&1
+git branch -M main >nul 2>&1
+if !errorlevel! equ 0 (
+    echo [OK] Git repository initialized
+) else (
+    echo [WARNING] Git initialization failed. Make sure Git is installed.
+)
+
+echo.
+echo ==========================================
+echo [OK] Project setup completed successfully!
+echo ==========================================
+echo.
+echo Project Statistics:
+for /f %%a in ('dir /s /b /ad ^| find /c /v ""') do echo    • Directories created: %%a
+for /f %%a in ('dir /s /b /a-d ^| find /c /v ""') do echo    • Files created: %%a
+echo.
+echo Project location: %CD%
+echo.
+echo Next Steps:
+echo.
+echo 1. Navigate to project directory:
+echo    cd %PROJECT_NAME%
+echo.
+echo 2. Create virtual environment:
+echo    python -m venv venv
+echo.
+echo 3. Activate virtual environment:
+echo    venv\Scripts\activate
+echo.
+echo 4. Copy your code files into the appropriate directories
+echo.
+echo 5. Install dependencies:
+echo    pip install -r requirements.txt
+echo.
+echo 6. Follow the SETUP_CHECKLIST.md for complete setup
+echo.
+echo Reference Files Created:
+echo    • PROJECT_STRUCTURE.md
+echo    • SETUP_CHECKLIST.md
+echo    • QUICK_REFERENCE.md
+echo    • .env.example
+echo.
+echo ==========================================
+echo Happy coding!
+echo ==========================================
+echo.
+pause
