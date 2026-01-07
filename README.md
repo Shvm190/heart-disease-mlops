@@ -2,6 +2,9 @@
 
 This project implements a production-ready MLOps pipeline for heart disease risk classification, featuring experiment tracking, containerization, and Kubernetes orchestration.
 
+# Video Submission
+https://wilpbitspilaniacin0-my.sharepoint.com/:f:/g/personal/2024ab05113_wilp_bits-pilani_ac_in/IgCqQLnS1uqzQ7-E_BZpZkRWAZV8VJHLVkT8rxN3uo0sDqs?e=6FsYnd
+
 # Architechture Diagram
 
 ```mermaid
